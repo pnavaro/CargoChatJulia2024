@@ -11,6 +11,14 @@
 
 #md # ---
 
+#md # ![](assets/two-langage-1.png)
+#
+#md # ---
+
+#md # ![](assets/two-langage-2.png)
+
+#md # ---
+
 #md #
 #md # # Pourquoi Julia?
 #md #
