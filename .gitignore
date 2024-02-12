@@ -2,3 +2,5 @@ build/
 *.swp
 Manifest.toml
 .ipynb_checkpoints/
+anim1.gif
+*.gif
