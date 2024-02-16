@@ -6,7 +6,7 @@ using .Threads
 println("Number of threads $(nthreads())")
 
 # +
-a = zeros(Int, 12)
+a = zeros(Int, 8)
 
 @threads for i = eachindex(a)
     a[i] = threadid()
@@ -90,9 +90,7 @@ function grayscott!( u, v, Δu, Δv)
 end
 # -
 
-# # Simulation
-
-function run_simulation( grayscott_function, n = 300, maxiter = 10_000)
+function create_animation( grayscott_function, n = 300, maxiter = 10_000)
     u, v = init(n)
     Δu = zeros(n, n)
     Δv = zeros(n, n)
@@ -104,9 +102,26 @@ function run_simulation( grayscott_function, n = 300, maxiter = 10_000)
     end every 100
     return anim
 end
-run_simulation( grayscott!, 500, 1)
-@time anim = run_simulation( grayscott!, 500, 5000)
-gif(anim, "anim1.gif", fps = 15)
+anim = create_animation( grayscott!, 300)
+gif(anim, "anim.gif", fps = 15)
+
+# # Simulation
+
+function run_simulation( grayscott_function, n = 300, maxiter = 10_000)
+    u, v = init(n)
+    Δu = zeros(n, n)
+    Δv = zeros(n, n)
+    options = (aspect_ratio = :equal, axis = nothing, 
+               legend = :none, framestyle = :none)
+    for t in 1:maxiter
+        grayscott_function(u, v, Δu, Δv)
+        #heatmap(u; options...)
+    end #every 100
+    #return anim
+end
+run_simulation( grayscott!, 600, 1)
+@time anim = run_simulation( grayscott!, 600)
+#gif(anim, "anim1.gif", fps = 15)
 # +
 using .Threads
 
@@ -120,8 +135,8 @@ function grayscott_threads!( u, v, Δu, Δv)
         for r = axes(Δu, 1)
             r1 = r + 1
             r2 = r + 2
-            @inbounds Δu[r,c] = u[r1,c2] + u[r1,c] + u[r2,c1] + u[r,c1] - 4*u[r1,c1]
-            @inbounds Δv[r,c] = v[r1,c2] + v[r1,c] + v[r2,c1] + v[r,c1] - 4*v[r1,c1]
+            Δu[r,c] = u[r1,c2] + u[r1,c] + u[r2,c1] + u[r,c1] - 4*u[r1,c1]
+            Δv[r,c] = v[r1,c2] + v[r1,c] + v[r2,c1] + v[r,c1] - 4*v[r1,c1]
         end
     end
 
@@ -129,16 +144,16 @@ function grayscott_threads!( u, v, Δu, Δv)
         c1 = c + 1
         for r = axes(Δu, 1)
             r1 = r + 1  
-            @inbounds uvv = u[r1,c1]*v[r1,c1]*v[r1,c1]
-            @inbounds u[r1,c1] +=  Dᵤ * Δu[r,c] - uvv + F*(1 - u[r1,c1])
-            @inbounds v[r1,c1] +=  Dᵥ * Δv[r,c] + uvv - (F + k)*v[r1,c1]
+            uvv = u[r1,c1]*v[r1,c1]*v[r1,c1]
+            u[r1,c1] +=  Dᵤ * Δu[r,c] - uvv + F*(1 - u[r1,c1])
+            v[r1,c1] +=  Dᵥ * Δv[r,c] + uvv - (F + k)*v[r1,c1]
         end
     end
 
 end
-run_simulation( grayscott_threads!, 500, 1)
-@time anim = run_simulation( grayscott_threads!, 500, 5000)
-gif(anim, "anim2.gif", fps = 15)
+run_simulation( grayscott_threads!, 600, 1)
+@time anim = run_simulation( grayscott_threads!, 600)
+#gif(anim, "anim2.gif", fps = 15)
 # -
 
 # ## Vectorized version
@@ -169,16 +184,17 @@ function run_simulation_vectorized( n = 300, maxiter = 10_000)
     uvv = zeros(n, n)
     options = (aspect_ratio = :equal, axis = nothing, 
                legend = :none, framestyle = :none)
-    anim = @animate for t in 1:maxiter
+    # anim = @animate 
+    for t in 1:maxiter
         grayscott_vectorized!(u, v, Δu, Δv, uvv)
-        heatmap(u; options...)
-    end every 100
-    return anim
+        #heatmap(u; options...)
+    end #every 100
+    #return anim
 end
 
 run_simulation_vectorized( 500, 1)
-@time anim = run_simulation_vectorized( 500, 5000)
-gif(anim, "anim3.gif", fps = 15)
+@time anim = run_simulation_vectorized( 600)
+#gif(anim, "anim3.gif", fps = 15)
 
 # +
 using CUDA
@@ -199,21 +215,14 @@ function run_on_gpu( n = 500, maxiter = 10_000)
     for t in 1:maxiter
     
         grayscott_vectorized!(u, v, Δu, Δv, uvv)
-        
-        anim = @animate for t in 1:maxiter
-            grayscott_vectorized!(u, v, Δu, Δv, uvv)
-            heatmap(Array(u); options...)
-        end every 100
-        return anim
 
     end
 
-    return anim
+    return Array(u), Array(v)
 
 end
 
-CUDA.@time anim = run_on_gpu( 500)
-gif(anim, "anim3.gif", fps = 15)
+CUDA.@time u, v  = run_on_gpu( 500)
 # -
 
 
