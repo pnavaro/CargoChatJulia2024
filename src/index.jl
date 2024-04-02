@@ -10,7 +10,7 @@
 #md #
 #md # Membre du [Groupe Calcul](https://calcul.math.cnrs.fr)
 #md #
-#md # Formation : Thèse de doctorat en Mécanique des fluides numerique
+#md # Formation : Thèse de doctorat en Mécanique des fluides.
 #md #
 #md # Langages : Fortran, Python, Julia et un peu de R
 #md #
@@ -60,21 +60,10 @@ f(3)
 #md # Les fonctions sont compilées lors du premier appel suivant le type de ses arguments
 
 #md # ```julia
-#md # @code_llvm f(3)
-#md # 
-#md # ;  @ In[22]:1 within `f`
-#md # define i64 @julia_f_1553(i64 signext %0) #0 {
-#md # top:
-#md # ; ┌ @ intfuncs.jl:332 within `literal_pow`
-#md # ; │┌ @ int.jl:88 within `*`
-#md #     %1 = shl i64 %0, 1
-#md # ; └└
-#md # ; ┌ @ int.jl:88 within `*`
-#md #    %2 = mul i64 %1, %0
-#md # ; └
-#md #   ret i64 %2
-#md # }
+#md # @code_llvm debuginfo = :none f(3)
 #md # ```
+import InteractiveUtils #hide
+InteractiveUtils.code_llvm(f, (Int,); debuginfo = :none) #hide
 
 #md # ---
 
@@ -133,12 +122,13 @@ A \ b
 #md # # Création d'un type Julia
 
 """
+    MyRational(n, d)
+
 Nombre rationnel
 """
 struct MyRational
     n :: Int
     d :: Int
-
     function MyRational(n :: Int, d :: Int) 
         @assert d != "zero denominator"
         g = gcd(n,d)
@@ -218,6 +208,16 @@ linear_regression( x, y)
 
 linear_regression( Float32.(x), Float32.(y))
 
+#md # Avec des flottants simple précision en entrée, on aimerait que tous les calculs soient fait en simple précision
+
+#md # Si le code source de la méthode est bien écrit, le code source et le type concret de tous les arguments sont des informations suffisantes pour que le compilateur puisse déduire le type concret de chaque variable au sein de la fonction. La fonction est alors dite "type stable" et le compilateur Julia produira un code efficace.
+
+#md # Si, pour diverses raisons, le type d'une variable locale ne peut pas être déduit des types des arguments, le compilateur produira un code machine plein de structures conditionnelles, couvrant toutes les options de ce que le type de chaque variable pourrait être. La perte de performance est souvent significative, facilement d'un facteur 10.
+
+#md # **Évitez les méthodes qui renvoient des variables dont le type dépend de la valeur.**
+#md #
+#md # **Dans la mesure du possible, utilisez des tableaux avec un type d'élément concret.**
+#md #
 #md # ---
 
 #md # ## Fonction typée pour une regression linéaire
@@ -311,7 +311,7 @@ model
 
 #md # ---
 
-#md # # Les particularités de Julia
+#md # # Les particularités du langage Julia
 #md #
 #md # - Les types composés ne pourront pas être modifiés dans une même session, peu pratique mais offre une meilleure gestion de la mémoire.
 #md # - Toutes les fonctions sont compilés lors de leur premier appel, un peu de lattence mais l'exécution est beaucoup plus rapide ensuite.
@@ -320,6 +320,32 @@ model
 #md # - Julia possède plusieurs manières pour manipuler les tableaux, très pratique pour optimiser son empreinte mémoire mais nécessite un apprentissage.
 #md # - La bibliothèque standard et quasiment tous les packages sont écrits en Julia, il est facile de s'en inspirer.
 #md # - Il y a un mécanisme de géneration de code et de méta-programmation qui permet de faire de très belles interfaces, il nécessite des compétences avancées.
-#md #
+#md # - L'interface avec R et Python est très facile, le C et le Fortran sont également nativement encapsulables. En revanche, le C++ c'est plus compliqué et c'est un frein à l'adoption du langage Julia.
 
 #md # ---
+#md #
+#md # # Ce qu'il faut savoir avant de se lancer...
+
+#md # - L'apprentissage profond en Julia est moins intéressant que les bibliothèques proposées en Python. Ce retard ne sera sûrement jamais comblé.
+#md # - Beaucoup de packages disponibles sont non maintenus ou complètement abandonnés. Il faut être prudent lorsque l'on choisit ses dépendances.
+#md # - Le "workflow" à mi-chemin entre le langage interprêté et le langage compilé est parfois déroutant et peut dégouter les débutants.
+#md # - L'IDE préconisé est VSCode mais il a moins de fonctionalités que ce qui est proposé dans les autres langages.
+#md # - L'optimisation de performance en Julia nécessite un apprentissage particulier. On peut être décu après une traduction naive depuis du Fortran ou du MATLAB.
+#md # - Les opérations vectorisées sont moins efficaces en Julia et cela peut être décevant si on est attaché à cette manière de coder les algorithmes.
+#md # - En Julia, il faut faire des fonctions pour minimiser les calculs et les allocations dans l'environnement global. Les erreurs dues à la portée des variables est parfois un peu déroutante.
+
+#md # ---
+#md #
+#md # # Les atouts du langage Julia
+#md #
+#md # - Une syntaxe lisible très proche des mathématiques et dans certains domaines comme les équations différentielles et l'optimisation, Julia a trouvé son public.
+#md # - C'est un langage bien concu, le "multiple dispatch" et la possibilité de l'optimiser de manière incrémentale en ajoutant progressivement les types, par exemple, est agréable.
+#md # - C'est un langage puissant qui permet beaucoup de productivité. Il y a beaucoup de fonctions haut-niveau disponibles qui permet d'écrire des algorithmes complexes en quelques lignes de codes.
+#md # - C'est un langage fait pour les sciences qui est gouverné par des scientifiques. L'écosystème est déjà très large dans beaucoup de disciplines.
+#md # - L'accès au calcul sur GPU est vraiment facile.
+#md # - Le système de gestion des packages est très efficace et c'est très simple de créer et proposer son propre package.
+#md # - Le Julia REPL est puissant et très pratique.
+#md # - Les notebooks Jupyter et Pluto.
+#md # - La parallélisation est proposé nativement dans le langage et très accéssible. C'est un candidat tout à fait crédible pour un projet HPC.
+
+
