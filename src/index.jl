@@ -26,44 +26,25 @@
 
 #md # ---
 
-#md #
-#md # # Un peu de bibliographie
-#md #
-#md # L'article des créateurs:
-#md #
-#md # **Julia: A Fresh Approach to Numerical Computing**
-#md # 
-#md # *Jeff Bezanson, Alan Edelman, Stefan Karpinski, Viral B. Shah*  SIAM Rev., 59(1), 65–98. (34 pages) 2012
-#md #
-#md # Sources des images : [Matthijs Cox - My Target Audience](https://scientificcoder.com/my-target-audience#heading-the-two-culture-problem)
-#md # 
-#md # [Julia Hub](https://juliahub.com/) : le portail Julia pour éxécuter des notebooks et voir tous les packages existants.
-#md # 
-#md # Le livre blanc : [Why Julia ?](https://juliahub.com/assets/pdf/why_julia.pdf)
-#md # 
-#md # Un article en français : [A la découverte de Julia](https://zestedesavoir.com/articles/pdf/78/a-la-decouverte-de-julia.pdf)
-#md # 
-#md # Liste du CNRS avec la newsletter  https://github.com/pnavaro/NouvellesJulia
-#md # 
-#md # Liste rennaise pour les ateliers et les formations https://github.com/pnavaro/math-julia
-#md # 
 
 
-#md # ---
 
 #md # # Une fonction Julia
 
 f(x) = 2x^2
 
-f(3)
-
-#md # Les fonctions sont compilées lors du premier appel suivant le type de ses arguments
+#md # Les fonctions sont compilées lors du premier appel suivant le type des arguments
 
 #md # ```julia
 #md # @code_llvm debuginfo = :none f(3)
 #md # ```
 import InteractiveUtils #hide
 InteractiveUtils.code_llvm(f, (Int,); debuginfo = :none) #hide
+#md # ```julia
+#md # @code_llvm debuginfo = :none f(1.5)
+#md # ```
+import InteractiveUtils #hide
+InteractiveUtils.code_llvm(f, (Float64,); debuginfo = :none) #hide
 
 #md # ---
 
@@ -90,8 +71,8 @@ f.(b)
 
 using LinearAlgebra
 
-X = hcat(ones(3), rand(3), rand(3))
-y = collect(1:3)
+X = hcat(ones(3), rand(3), rand(3)) # initialise une matrice avec 3 colonnes
+y = collect(1:3) # collect transforme l'itérateur en tableau
 
 β = inv(X'X) * X'y
 
@@ -115,7 +96,7 @@ A = sparse(rows, cols, vals, 5, 5)
 
 b = collect(1:5)
 
-A \ b
+A \ b # le solveur utilisé dépendra du type de la matrice, creuse, symétrique, définie positive...
 
 #md # ---
 
@@ -136,13 +117,13 @@ struct MyRational
     end
 end
 
-a = MyRational(3, 4)
+a = MyRational(14, 8)
 
 #md #
 
 Base.show(io::IO, r::MyRational) = print(io, "$(r.n) // $(r.d)")
 
-b = MyRational(2, 3)
+b = MyRational(14, 8)
 
 #md # ---
 
@@ -178,7 +159,7 @@ x, y =  generate_data( rng, weights, bias)
 
 #md # ---
 
-#md # ## Fonction non typée pour une regression linéaire
+#md # ## Fonction non typée pour une régression linéaire
 
 function linear_regression( x, y; learning_rate = 0.01, iterations = 1000)
         
@@ -190,7 +171,7 @@ function linear_regression( x, y; learning_rate = 0.01, iterations = 1000)
         
         y_pred =  x' * weights .+ bias
         dw = x * ( y_pred .- y ) ./ num_samples
-        db = sum(y_pred .- y ) ./ num_samples
+        db = sum(y_pred .- y ) / num_samples
         weights .-= learning_rate .* dw
         bias -= learning_rate * db
         
@@ -208,11 +189,11 @@ linear_regression( x, y)
 
 linear_regression( Float32.(x), Float32.(y))
 
-#md # Avec des flottants simple précision en entrée, on aimerait que tous les calculs soient fait en simple précision
+#md # Avec des flottants simple précision en entrée, on aimerait que tous les calculs soient faits en simple précision
 
 #md # Si le code source de la méthode est bien écrit, le code source et le type concret de tous les arguments sont des informations suffisantes pour que le compilateur puisse déduire le type concret de chaque variable au sein de la fonction. La fonction est alors dite "type stable" et le compilateur Julia produira un code efficace.
 
-#md # Si, pour diverses raisons, le type d'une variable locale ne peut pas être déduit des types des arguments, le compilateur produira un code machine plein de structures conditionnelles, couvrant toutes les options de ce que le type de chaque variable pourrait être. La perte de performance est souvent significative, facilement d'un facteur 10.
+#md # Si, pour diverses raisons, le type d'une variable locale ne peut pas être déduit des types des arguments, le compilateur produit, un code machine beaucoup de structures conditionnelles, couvrant toutes les options de ce que le type de chaque variable pourrait être. La perte de performance est souvent significative, facilement d'un facteur 10.
 
 #md # **Évitez les méthodes qui renvoient des variables dont le type dépend de la valeur.**
 #md #
@@ -220,7 +201,7 @@ linear_regression( Float32.(x), Float32.(y))
 #md #
 #md # ---
 
-#md # ## Fonction typée pour une regression linéaire
+#md # ## Fonction typée pour une régression linéaire
 
 function linear_regression( x::Matrix{T}, y::Vector{T}; learning_rate = 0.01, iterations = 1000) where T
         
@@ -314,38 +295,60 @@ model
 #md # # Les particularités du langage Julia
 #md #
 #md # - Les types composés ne pourront pas être modifiés dans une même session, peu pratique mais offre une meilleure gestion de la mémoire.
-#md # - Toutes les fonctions sont compilés lors de leur premier appel, un peu de lattence mais l'exécution est beaucoup plus rapide ensuite.
-#md # - Les fonctions sont spécialisées suivant le type de leurs arguments, plus de compilation mais cela améliore la lisibilité de vos interfaces.
-#md # - Julia est interactif, facile à utiliser mais la création de binaires est compliquée.
-#md # - Julia possède plusieurs manières pour manipuler les tableaux, très pratique pour optimiser son empreinte mémoire mais nécessite un apprentissage.
+#md # - Toutes les fonctions sont compilées lors de leur premier appel, un peu de latence, mais l'exécution est beaucoup plus rapide ensuite.
+#md # - Les fonctions sont spécialisées suivant le type de leurs arguments, plus de compilation, mais cela améliore la lisibilité de vos interfaces.
+#md # - Julia est interactif, facile à utiliser, mais la création de binaire est compliquée.
+#md # - Julia possède plusieurs manières pour manipuler les tableaux, très pratique pour optimiser son empreinte mémoire, mais nécessite un apprentissage.
 #md # - La bibliothèque standard et quasiment tous les packages sont écrits en Julia, il est facile de s'en inspirer.
-#md # - Il y a un mécanisme de géneration de code et de méta-programmation qui permet de faire de très belles interfaces, il nécessite des compétences avancées.
-#md # - L'interface avec R et Python est très facile, le C et le Fortran sont également nativement encapsulables. En revanche, le C++ c'est plus compliqué et c'est un frein à l'adoption du langage Julia.
+#md # - Il y a un mécanisme de génération de code et de métaprogrammation qui permet de faire de très belles interfaces. Il nécessite des compétences avancées et le déverminage est plus difficile.
+#md # - L'interface avec R et Python est très facile, le C et le Fortran sont également nativement encapsulables. En revanche, le C++ c'est plus compliqué...
 
 #md # ---
 #md #
 #md # # Ce qu'il faut savoir avant de se lancer...
 
-#md # - L'apprentissage profond en Julia est moins intéressant que les bibliothèques proposées en Python. Ce retard ne sera sûrement jamais comblé.
-#md # - Beaucoup de packages disponibles sont non maintenus ou complètement abandonnés. Il faut être prudent lorsque l'on choisit ses dépendances.
-#md # - Le "workflow" à mi-chemin entre le langage interprêté et le langage compilé est parfois déroutant et peut dégouter les débutants.
-#md # - L'IDE préconisé est VSCode mais il a moins de fonctionalités que ce qui est proposé dans les autres langages.
-#md # - L'optimisation de performance en Julia nécessite un apprentissage particulier. On peut être décu après une traduction naive depuis du Fortran ou du MATLAB.
-#md # - Les opérations vectorisées sont moins efficaces en Julia et cela peut être décevant si on est attaché à cette manière de coder les algorithmes.
-#md # - En Julia, il faut faire des fonctions pour minimiser les calculs et les allocations dans l'environnement global. Les erreurs dues à la portée des variables est parfois un peu déroutante.
+#md # - L'apprentissage profond en Julia est en retard par rapport à ce que proposent les bibliothèques proposées en Python. Il y a tout de même des choses intéressantes en différentiation automatique.
+#md # - Beaucoup de packages disponibles sont non maintenus ou complètement abandonnés. Il faut être prudent lorsque l'on choisit ses dépendances. Si la licence le permet, on peut toujours récupérer des choses dans les packages, ils sont écrits en Julia.
+#md # - Le "workflow" à mi-chemin entre le langage interprété et le langage compilé est parfois déroutant et peut dégoûter les débutants. Les durées de compilations ont été fortement réduites depuis la version 1.
+#md # - L'IDE préconisé est VSCode, mais il a moins de fonctionnalités que ce qui est proposé dans les autres langages.
+#md # - L'optimisation de performance en Julia nécessite un apprentissage particulier. On peut être déçu après une traduction naïve depuis du Fortran ou du MATLAB. C'est aussi la partie la plus "satisfaisante" du langage et attention cela peut devenir addictif :-)
+#md # - Les opérations vectorisées sont moins efficaces en Julia et cela peut être décevant si l'on est attaché à cette manière de coder les algorithmes. En revanche, vous pouvez faire autant de boucles que vous voulez !
+#md # - En Julia, il faut faire des fonctions pour minimiser les calculs et les allocations dans l'environnement global. Les erreurs dues à la portée des variables sont parfois un peu déroutantes.
 
 #md # ---
 #md #
-#md # # Les atouts du langage Julia
+#md # # Pourquoi il faut se lancer !
 #md #
-#md # - Une syntaxe lisible très proche des mathématiques et dans certains domaines comme les équations différentielles et l'optimisation, Julia a trouvé son public.
-#md # - C'est un langage bien concu, le "multiple dispatch" et la possibilité de l'optimiser de manière incrémentale en ajoutant progressivement les types, par exemple, est agréable.
-#md # - C'est un langage puissant qui permet beaucoup de productivité. Il y a beaucoup de fonctions haut-niveau disponibles qui permet d'écrire des algorithmes complexes en quelques lignes de codes.
-#md # - C'est un langage fait pour les sciences qui est gouverné par des scientifiques. L'écosystème est déjà très large dans beaucoup de disciplines.
-#md # - L'accès au calcul sur GPU est vraiment facile.
-#md # - Le système de gestion des packages est très efficace et c'est très simple de créer et proposer son propre package.
-#md # - Le Julia REPL est puissant et très pratique.
-#md # - Les notebooks Jupyter et Pluto.
-#md # - La parallélisation est proposé nativement dans le langage et très accéssible. C'est un candidat tout à fait crédible pour un projet HPC.
+#md # - **C'est beau** : une syntaxe lisible très proche des mathématiques 
+#md # - **C'est puissant** : un langage bien conçu, le "multiple dispatch" et la possibilité de l'optimiser de manière incrémentale en ajoutant progressivement les types, par exemple, est agréable. Il y a beaucoup de fonctions haut-niveau disponibles qui permettent d'écrire des algorithmes complexes en quelques lignes de codes.
+#md # - **C'est fait pour nous** : c'est un langage fait pour les sciences qui est gouverné par des scientifiques. L'écosystème est déjà très large dans beaucoup de disciplines. Pour les équations différentielles et l'optimisation mathématique, Julia est déjà populaire.
+#md # - **C'est facile** : l'apprentissage est rapide et l'accès au calcul sur GPU, par exemple, est très simple.
+#md # - **C'est interactif** : Le Julia REPL est puissant et très pratique et on peut utiliser les notebooks Jupyter ou Pluto.
+#md # - **C'est rapide** : Le code est compilé, la parallélisation est proposée nativement et très accessible. C'est un candidat tout à fait crédible pour un projet HPC.
+#md # - **C'est ouvert** : Le langage Julia est publié sous une licence MIT. Le système de gestion des packages est très efficace et c'est très simple de créer et proposer son propre package.
+#md #
+#md # ---
 
-
+#md #
+#md # #  Bibliographie
+#md #
+#md # L'article des créateurs:
+#md #
+#md # **Julia: A Fresh Approach to Numerical Computing**
+#md # 
+#md # *Jeff Bezanson, Alan Edelman, Stefan Karpinski, Viral B. Shah*  SIAM Rev., 59(1), 65–98. (34 pages) 2012
+#md #
+#md # Sources des images : [Matthijs Cox - My Target Audience](https://scientificcoder.com/my-target-audience#heading-the-two-culture-problem)
+#md # 
+#md # [Julia Hub](https://juliahub.com/) : le portail Julia pour exécuter des notebooks et voir tous les packages existants.
+#md # 
+#md # Le livre blanc : [Why Julia ?](https://juliahub.com/assets/pdf/why_julia.pdf)
+#md # 
+#md # Un article en français : [A la découverte de Julia](https://zestedesavoir.com/articles/pdf/78/a-la-decouverte-de-julia.pdf)
+#md #
+#md # Un support pour se lancer : [Modern Julia Workflows](https://modernjuliaworkflows.github.io)
+#md # 
+#md # Liste du CNRS avec la newsletter  https://github.com/pnavaro/NouvellesJulia
+#md # 
+#md # Liste rennaise pour les ateliers et les formations https://github.com/pnavaro/math-julia
+#md # 
