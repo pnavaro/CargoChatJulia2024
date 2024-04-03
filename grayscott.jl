@@ -102,7 +102,7 @@ function create_animation( grayscott_function, n = 300, maxiter = 10_000)
     end every 100
     return anim
 end
-anim = create_animation( grayscott!, 300)
+@time anim = create_animation( grayscott!, 300)
 gif(anim, "anim.gif", fps = 15)
 
 # # Simulation
