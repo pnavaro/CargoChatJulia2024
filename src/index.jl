@@ -2,6 +2,8 @@
 
 #md # # CargoChat Julia 5 avril 2024
 #md #
+#md # https://cargo.resinfo.org
+#md #
 #md # ## Pierre Navaro
 #md #
 #md # Ingénieur Calcul à l'IRMAR (Institut de Recherche Mathématique de Rennes)
