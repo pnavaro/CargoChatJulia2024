@@ -113,9 +113,9 @@ f(A)
 
 ```
 3×3 Matrix{Float64}:
- 0.355761  1.15693  0.592114
- 1.06035   2.98438  1.34261
- 0.58783   1.80414  0.861689
+ 0.534178  0.490586  1.35087
+ 0.701184  0.949152  2.2381
+ 0.716253  0.759981  1.99803
 ```
 
 
@@ -172,9 +172,9 @@ y = collect(1:3) # collect transforme l'itérateur en tableau
 
 ```
 3-element Vector{Float64}:
- -5.585490605418073
- 10.370821750988597
-  7.639307715610414
+  5.436335951599908
+ -2.8032615629146775
+ -6.364071378959466
 ```
 
 
@@ -185,9 +185,9 @@ y = collect(1:3) # collect transforme l'itérateur en tableau
 
 ```
 3-element Vector{Float64}:
- -5.585490605418139
- 10.370821750988659
-  7.639307715610445
+  5.436335951599919
+ -2.8032615629146806
+ -6.364071378959477
 ```
 
 
@@ -256,15 +256,29 @@ A \ b # le solveur utilisé dépendra du type de la matrice, creuse, symétrique
 Nombre rationnel
 """
 struct MyRational
+
     n :: Int
     d :: Int
+
     function MyRational(n :: Int, d :: Int)
-        @assert d != "zero denominator"
+        @assert  d != 0 "dénominateur nul"
         g = gcd(n,d)
         new( n ÷ g, d ÷ g)
     end
-end
 
+end
+```
+
+
+```
+Main.var"ex-index".MyRational
+```
+
+
+---
+
+
+```julia
 a = MyRational(14, 8)
 ```
 
@@ -277,16 +291,13 @@ Main.var"ex-index".MyRational(7, 4)
 ```julia
 Base.show(io::IO, r::MyRational) = print(io, "$(r.n) // $(r.d)")
 
-b = MyRational(14, 8)
+b = MyRational(5, 9)
 ```
 
 
 ```
-7 // 4
+5 // 9
 ```
-
-
----
 
 
 ```julia
@@ -300,7 +311,7 @@ a + b
 
 
 ```
-7 // 2
+83 // 36
 ```
 
 
