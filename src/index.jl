@@ -110,14 +110,19 @@ A \ b # le solveur utilisé dépendra du type de la matrice, creuse, symétrique
 Nombre rationnel
 """
 struct MyRational
+
     n :: Int
     d :: Int
+
     function MyRational(n :: Int, d :: Int) 
-        @assert d != "zero denominator"
+        @assert  d != 0 "dénominateur nul"
         g = gcd(n,d)
         new( n ÷ g, d ÷ g)
     end
+
 end
+
+#md # ---
 
 a = MyRational(14, 8)
 
@@ -125,9 +130,9 @@ a = MyRational(14, 8)
 
 Base.show(io::IO, r::MyRational) = print(io, "$(r.n) // $(r.d)")
 
-b = MyRational(14, 8)
+b = MyRational(5, 9)
 
-#md # ---
+#md #
 
 import Base.+
 function +(a::MyRational, b::MyRational)
