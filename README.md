@@ -1,6 +1,6 @@
 # CargoChat Julia 5 avril 2024
 
-[diapositives](https://pnavaro.github.io/CargoChat2024)
+[diapositives](https://pnavaro.github.io/CargoChatJulia2024)
 
 Supports de présentation pour le [Cargo Chat](https://cargo.resinfo.org/spip.php?article106) du 5 avril 2024
 
