@@ -136,21 +136,20 @@ CUDA.@time linear_regression(cu(x), cu(y), β)
 struct LinearRegression{T}
 
    learning_rate :: T
-   iterations :: Int 
+   iterations :: Int
    β :: Vector{T}
-    
-   function LinearRegression( x :: Matrix{T}, y :: Vector{T}; learning_rate = 0.01, iterations = 1000) where T
-        
-        num_features, num_samples  = size(x)
-        β = Vector{T}(undef, num_features)
-        linear_regression(x, y, β; learning_rate = learning_rate, iterations = iterations)
-        
-        new{T}( learning_rate, iterations, β)
-        
-    end
-        
-end
 
+   function LinearRegression( x :: AbstractMatrix{T}, y :: AbstractVector{T}; learning_rate = 0.01, iterations = 1000) where T
+
+        num_features, num_samples  = size(x)
+        β = convert(typeof(y), zeros(num_features))
+        linear_regression(x, y, β; learning_rate = learning_rate, iterations = iterations)
+
+        new{T}( learning_rate, iterations, β)
+
+    end
+
+end
 
 model = LinearRegression(x, y)
 
