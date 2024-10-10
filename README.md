@@ -4,6 +4,14 @@
 
 Supports de présentation pour le [Cargo Chat](https://cargo.resinfo.org/spip.php?article106) du 5 avril 2024
 
+Pour exécuter les notebooks, installer `jupytext` avec `pip` ou `conda` :
+
+```bash
+git clone https://github.com/pnavaro/CargoChatJulia2024
+cd CargoChatJulia2024
+jupytext --to ipynb *.jl
+```
+
 ## Résumé
 
 Julia est un langage de programmation créé au MIT en 2012. Sa
